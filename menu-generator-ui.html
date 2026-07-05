@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu desk — buffet planning ticket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241C15;
+    --ink-soft:#5B4F3E;
+    --paper:#EFE6D0;
+    --paper-2:#E4D8B8;
+    --paper-3:#F7F1E1;
+    --gold:#C68E17;
+    --gold-deep:#8A5F0C;
+    --wine:#6B2737;
+    --wine-deep:#4A1A26;
+    --forest:#2F4B3C;
+    --forest-deep:#1E3128;
+    --line: rgba(36,28,21,0.18);
+    --line-strong: rgba(36,28,21,0.32);
+    --radius: 10px;
+    --shadow-card: 0 1px 0 rgba(36,28,21,0.06);
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:2.5rem 1.5rem 4rem;
+  }
+
+  header.masthead{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:1rem;
+    padding-bottom:1.25rem;
+    margin-bottom:2rem;
+    border-bottom:2px solid var(--ink);
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--wine);
+    margin:0 0 0.4rem;
+    font-weight:600;
+  }
+
+  h1.title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(28px, 4vw, 42px);
+    line-height:1.05;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  h1.title em{
+    font-style:italic;
+    font-weight:500;
+    color:var(--forest);
+  }
+
+  .masthead-meta{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    text-align:right;
+    line-height:1.6;
+  }
+
+  .desk{
+    display:grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap:0;
+    background:var(--paper-3);
+    border:2px solid var(--ink);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:var(--shadow-card);
+  }
+
+  @media (max-width: 860px){
+    .desk{ grid-template-columns:1fr; }
+    .perforation{ display:none; }
+  }
+
+  .ticket-panel{
+    padding:2rem 2rem 2.25rem;
+    position:relative;
+  }
+
+  .panel-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 1.4rem;
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+  }
+
+  .panel-label::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .field{
+    margin-bottom:1.15rem;
+  }
+
+  .field label{
+    display:block;
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink);
+    margin-bottom:0.4rem;
+  }
+
+  .field .hint{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:0.35rem;
+    line-height:1.4;
+  }
+
+  .field input, .field select{
+    width:100%;
+    height:42px;
+    padding:0 0.85rem;
+    background:var(--paper-3);
+    border:1.5px solid var(--line-strong);
+    border-radius:6px;
+    font-family:'Work Sans', sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    transition:border-color 0.15s ease;
+  }
+
+  .field input[type="number"]{
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  .field input:focus, .field select:focus{
+    outline:none;
+    border-color:var(--forest);
+    box-shadow:0 0 0 3px rgba(47,75,60,0.15);
+  }
+
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:0.85rem;
+  }
+
+  .submit-btn{
+    width:100%;
+    height:48px;
+    margin-top:0.5rem;
+    background:var(--forest);
+    color:var(--paper-3);
+    border:none;
+    border-radius:6px;
+    font-family:'Work Sans', sans-serif;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    transition:background 0.15s ease, transform 0.05s ease;
+  }
+
+  .submit-btn:hover{ background:var(--forest-deep); }
+  .submit-btn:active{ transform:scale(0.98); }
+  .submit-btn:disabled{ background:#A7A192; cursor:not-allowed; }
+
+  .sample-link{
+    display:block;
+    text-align:center;
+    margin-top:0.9rem;
+    font-size:12.5px;
+    color:var(--wine);
+    text-decoration:underline;
+    text-underline-offset:2px;
+    cursor:pointer;
+    background:none;
+    border:none;
+    width:100%;
+    font-family:'Work Sans', sans-serif;
+  }
+
+  .perforation{
+    width:0;
+    border-left:2px dashed var(--line-strong);
+    position:relative;
+  }
+  .perforation::before, .perforation::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    width:22px;
+    height:22px;
+    background:var(--paper);
+    border-radius:50%;
+  }
+  .perforation::before{ top:-11px; }
+  .perforation::after{ bottom:-11px; }
+
+  .card-panel{
+    padding:2rem 2.25rem 2.25rem;
+    background:var(--paper-3);
+    display:flex;
+    flex-direction:column;
+  }
+
+  .empty-state{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:2rem 1rem;
+    color:var(--ink-soft);
+  }
+
+  .empty-state svg{ margin-bottom:1.1rem; opacity:0.85; }
+
+  .empty-state .empty-title{
+    font-family:'Fraunces', serif;
+    font-size:19px;
+    color:var(--ink);
+    margin:0 0 0.35rem;
+  }
+
+  .empty-state .empty-body{
+    font-size:13.5px;
+    max-width:280px;
+    line-height:1.5;
+    margin:0;
+  }
+
+  .loading-state{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:0.9rem;
+    color:var(--ink-soft);
+    font-size:13.5px;
+  }
+
+  .spinner{
+    width:34px; height:34px;
+    border-radius:50%;
+    border:3px solid var(--line);
+    border-top-color:var(--forest);
+    animation:spin 0.9s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  @media (prefers-reduced-motion:reduce){ .spinner{ animation-duration:2.4s; } }
+
+  .error-state{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:1.5rem;
+    border:1.5px solid var(--wine);
+    border-radius:8px;
+    background:rgba(107,39,55,0.06);
+  }
+
+  .error-state .error-title{
+    font-family:'Fraunces', serif;
+    font-size:17px;
+    color:var(--wine-deep);
+    margin:0 0 0.5rem;
+  }
+
+  .error-state p{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    margin:0 0 0.25rem;
+  }
+
+  .error-state code{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    background:rgba(36,28,21,0.06);
+    padding:2px 5px;
+    border-radius:4px;
+  }
+
+  .gauge-row{
+    display:flex;
+    align-items:center;
+    gap:1.4rem;
+    padding-bottom:1.4rem;
+    margin-bottom:1.4rem;
+    border-bottom:1.5px dashed var(--line-strong);
+  }
+
+  .gauge-numbers{ flex:1; }
+
+  .gauge-numbers .sample-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    background:rgba(198,142,23,0.16);
+    padding:2px 7px;
+    border-radius:4px;
+    margin-bottom:0.5rem;
+  }
+
+  .gauge-numbers .cost-line{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:26px;
+    font-weight:600;
+    color:var(--ink);
+    line-height:1.1;
+  }
+
+  .gauge-numbers .cost-sub{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:0.35rem;
+  }
+
+  .gauge-numbers .cost-sub.over{ color:var(--wine); font-weight:500; }
+  .gauge-numbers .cost-sub.under{ color:var(--forest); font-weight:500; }
+
+  .menu-title-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:1.1rem;
+  }
+
+  .menu-title-row h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:22px;
+    margin:0;
+  }
+
+  .menu-title-row .guest-count{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+
+  .menu-sections{
+    display:grid;
+    gap:1.1rem;
+  }
+
+  .menu-section{
+    padding-bottom:0.9rem;
+    border-bottom:1px solid var(--line);
+  }
+  .menu-section:last-child{ border-bottom:none; padding-bottom:0; }
+
+  .menu-section .section-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    margin-bottom:0.45rem;
+  }
+
+  .menu-section .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--gold-deep);
+    flex-shrink:0;
+  }
+
+  .menu-section ul{
+    margin:0;
+    padding:0 0 0 1.05rem;
+    list-style:none;
+  }
+
+  .menu-section li{
+    font-size:14.5px;
+    line-height:1.65;
+    position:relative;
+  }
+
+  .menu-section li::before{
+    content:"—";
+    position:absolute;
+    left:-1.05rem;
+    color:var(--ink-soft);
+  }
+
+  .footer-note{
+    margin-top:2rem;
+    padding-top:1.25rem;
+    border-top:1px solid var(--line);
+    font-size:11.5px;
+    color:var(--ink-soft);
+    line-height:1.6;
+  }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px;
+    padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">Buffet planning ticket</p>
+      <h1 class="title">The menu <em>desk</em></h1>
+    </div>
+    <div class="masthead-meta">
+      Priced in Uganda shillings<br>
+      Per plate, before service
+    </div>
+  </header>
+
+  <div class="desk">
+
+    <div class="ticket-panel">
+      <p class="panel-label">Order ticket</p>
+
+      <form id="menu-form">
+        <div class="field">
+          <label for="event_type">Event type</label>
+          <select id="event_type">
+            <option value="wedding" selected>Wedding</option>
+            <option value="introduction">Introduction (kuhingira)</option>
+            <option value="birthday">Birthday</option>
+            <option value="corporate">Corporate function</option>
+            <option value="funeral">Funeral / vigil</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="cuisine">Cuisine</label>
+          <input type="text" id="cuisine" value="Ugandan" placeholder="Ugandan">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="guests">Guests</label>
+            <input type="number" id="guests" value="100" min="1" step="1">
+          </div>
+          <div class="field">
+            <label for="budget_per_plate">Budget / plate (UGX)</label>
+            <input type="number" id="budget_per_plate" value="30000" min="0" step="500">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="webhook_url">Workflow webhook URL</label>
+          <input type="text" id="webhook_url" placeholder="https://your-n8n-instance.com/webhook/menu-generator">
+          <p class="hint">Paste the production webhook URL from the "Webhook Trigger" node.</p>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">Generate menu</button>
+        <button type="button" class="sample-link" id="sample-btn">See a sample menu instead</button>
+      </form>
+    </div>
+
+    <div class="perforation" aria-hidden="true"></div>
+
+    <div class="card-panel" id="card-panel">
+      <div class="empty-state" id="empty-state">
+        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <circle cx="28" cy="28" r="24" stroke="#5B4F3E" stroke-width="1.6" stroke-dasharray="3 4"/>
+          <circle cx="28" cy="28" r="15" stroke="#5B4F3E" stroke-width="1.6"/>
+        </svg>
+        <p class="empty-title">Your menu will land here</p>
+        <p class="empty-body">Fill in the order ticket and generate a menu to see the plate, the courses, and the cost per guest.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="footer-note">
+    The plate splits estimated cost by course, using the same keyword pricing the workflow uses (chicken, beef, matooke, rice, beans, greens, banana). Courses with no priced ingredients won't add to the total.
+  </p>
+
+</div>
+
+<script>
+(function(){
+  const form = document.getElementById('menu-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const sampleBtn = document.getElementById('sample-btn');
+  const cardPanel = document.getElementById('card-panel');
+
+  const PRICES = {
+    chicken: 12000, beef: 10000, matooke: 3000,
+    rice: 4000, beans: 2000, greens: 1500, banana: 2000
+  };
+
+  const CATEGORIES = [
+    { key:'starter',    label:'Starter'    },
+    { key:'proteins',   label:'Proteins'   },
+    { key:'starches',   label:'Starches'   },
+    { key:'vegetables', label:'Vegetables' },
+    { key:'dessert',    label:'Dessert'    }
+  ];
+
+  const SEGMENT_COLORS = ['#C68E17', '#6B2737', '#2F4B3C', '#8A5F0C', '#4A1A26'];
+
+  function fmtUGX(n){
+    if (n === null || n === undefined || isNaN(n)) return '—';
+    return Math.round(n).toLocaleString('en-UG') + ' UGX';
+  }
+
+  function parseMenuText(text){
+    const result = {};
+    CATEGORIES.forEach(cat => {
+      const re = new RegExp(cat.label + ':\\s*\\n((?:\\s*-.*\\n?)+)', 'i');
+      const m = text.match(re);
+      if (m){
+        result[cat.key] = m[1].split('\n')
+          .map(s => s.replace(/^\s*-\s*/, '').trim())
+          .filter(Boolean);
+      } else {
+        result[cat.key] = [];
+      }
+    });
+    const costMatch = text.match(/Estimated Cost:\s*([\d,]+)/i);
+    result.estimatedCost = costMatch ? parseInt(costMatch[1].replace(/,/g, ''), 10) : null;
+    return result;
+  }
+
+  function itemCost(item){
+    const lower = item.toLowerCase();
+    let cost = 0;
+    for (const key in PRICES){
+      if (lower.includes(key)) cost += PRICES[key];
+    }
+    return cost;
+  }
+
+  function buildBreakdown(menu){
+    const raw = {};
+    let sum = 0;
+    CATEGORIES.forEach(cat => {
+      const items = menu[cat.key] || [];
+      const c = items.reduce((acc, it) => acc + itemCost(it), 0);
+      raw[cat.key] = c;
+      sum += c;
+    });
+    if (sum === 0){
+      const withItems = CATEGORIES.filter(cat => (menu[cat.key] || []).length > 0);
+      const share = withItems.length ? 1 / withItems.length : 0;
+      withItems.forEach(cat => { raw[cat.key] = share; });
+      sum = withItems.length ? 1 : 0;
+    }
+    return { raw, sum };
+  }
+
+  function plateSVG(menu, budget){
+    const { raw, sum } = buildBreakdown(menu);
+    const total = menu.estimatedCost !== null ? menu.estimatedCost : sum;
+    const cx = 60, cy = 60, r = 46, stroke = 14;
+    const circumference = 2 * Math.PI * r;
+
+    let segments = '';
+    let offset = 0;
+    let i = 0;
+    CATEGORIES.forEach(cat => {
+      const val = raw[cat.key] || 0;
+      if (val <= 0 || sum <= 0) { i++; return; }
+      const frac = val / sum;
+      const len = frac * circumference;
+      segments += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${SEGMENT_COLORS[i % SEGMENT_COLORS.length]}" stroke-width="${stroke}" stroke-dasharray="${len} ${circumference - len}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" stroke-linecap="butt"/>`;
+      offset += len;
+      i++;
+    });
+
+    const ringFrac = budget > 0 ? Math.min(total / budget, 1) : 0;
+    const ringR = r + 10;
+    const ringCirc = 2 * Math.PI * ringR;
+    const ringLen = ringFrac * ringCirc;
+    const over = budget > 0 && total > budget;
+    const ringColor = over ? '#6B2737' : '#2F4B3C';
+
+    return `
+    <svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Plate showing cost split by course and budget usage">
+      <circle cx="${cx}" cy="${cy}" r="${ringR}" fill="none" stroke="rgba(36,28,21,0.12)" stroke-width="4"/>
+      <circle cx="${cx}" cy="${cy}" r="${ringR}" fill="none" stroke="${ringColor}" stroke-width="4" stroke-dasharray="${ringLen} ${ringCirc - ringLen}" stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="#F7F1E1" stroke="rgba(36,28,21,0.15)" stroke-width="1"/>
+      ${segments}
+      <circle cx="${cx}" cy="${cy}" r="${r - stroke/2 - 2}" fill="#F7F1E1"/>
+    </svg>`;
+  }
+
+  function renderMenu(menu, meta){
+    const budget = meta.budget_per_plate;
+    const guests = meta.guests;
+    const total = menu.estimatedCost;
+    const perGuestLine = total !== null
+      ? `${fmtUGX(total)} per plate &middot; ${fmtUGX(total * guests)} for ${guests} guests`
+      : `Guests: ${guests}`;
+
+    let subLine = '';
+    if (total !== null && budget){
+      const diff = total - budget;
+      if (diff > 0){
+        subLine = `<p class="cost-sub over">${fmtUGX(diff)} over the ${fmtUGX(budget)} budget</p>`;
+      } else {
+        subLine = `<p class="cost-sub under">${fmtUGX(Math.abs(diff))} under the ${fmtUGX(budget)} budget</p>`;
+      }
+    }
+
+    const sectionsHTML = CATEGORIES.map(cat => {
+      const items = menu[cat.key] || [];
+      if (!items.length) return '';
+      return `
+        <div class="menu-section">
+          <div class="section-label"><span class="dot"></span>${cat.label}</div>
+          <ul>${items.map(it => `<li>${escapeHTML(it)}</li>`).join('')}</ul>
+        </div>`;
+    }).join('');
+
+    cardPanel.innerHTML = `
+      <div class="gauge-row">
+        ${plateSVG(menu, budget)}
+        <div class="gauge-numbers">
+          ${meta.isSample ? '<span class="sample-tag">Sample</span><br>' : ''}
+          <div class="cost-line">${fmtUGX(total)}</div>
+          <p class="cost-sub">${perGuestLine}</p>
+          ${subLine}
+        </div>
+      </div>
+      <div class="menu-title-row">
+        <h2>${capitalize(meta.event_type)} buffet</h2>
+        <span class="guest-count">${capitalize(meta.cuisine)} &middot; ${guests} guests</span>
+      </div>
+      <div class="menu-sections">${sectionsHTML}</div>
+    `;
+  }
+
+  function renderLoading(){
+    cardPanel.innerHTML = `
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Sending the order to the kitchen&hellip;</p>
+      </div>`;
+  }
+
+  function renderError(message, detail){
+    cardPanel.innerHTML = `
+      <div class="error-state">
+        <p class="error-title">Order didn't go through</p>
+        <p>${escapeHTML(message)}</p>
+        ${detail ? `<p><code>${escapeHTML(detail)}</code></p>` : ''}
+        <p>Check that the webhook URL is correct and the workflow is active in n8n.</p>
+      </div>`;
+  }
+
+  function capitalize(s){
+    if (!s) return '';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function escapeHTML(s){
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    const webhookUrl = document.getElementById('webhook_url').value.trim();
+    const meta = {
+      event_type: document.getElementById('event_type').value,
+      cuisine: document.getElementById('cuisine').value.trim() || 'Ugandan',
+      guests: parseInt(document.getElementById('guests').value, 10) || 1,
+      budget_per_plate: parseInt(document.getElementById('budget_per_plate').value, 10) || 0
+    };
+
+    if (!webhookUrl){
+      renderError('Add the workflow webhook URL before generating a menu.');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending order…';
+    renderLoading();
+
+    try {
+      const res = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(meta)
+      });
+
+      if (!res.ok){
+        throw new Error('HTTP ' + res.status);
+      }
+
+      const raw = await res.text();
+      let menu;
+      try {
+        const asJSON = JSON.parse(raw);
+        menu = typeof asJSON === 'object' && asJSON.output ? parseMenuText(asJSON.output) : asJSON;
+      } catch(_){
+        menu = parseMenuText(raw);
+      }
+
+      renderMenu(menu, meta);
+    } catch(err){
+      renderError('The webhook didn\'t respond as expected.', err.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Generate menu';
+    }
+  });
+
+  sampleBtn.addEventListener('click', function(){
+    const meta = {
+      event_type: document.getElementById('event_type').value,
+      cuisine: document.getElementById('cuisine').value.trim() || 'Ugandan',
+      guests: parseInt(document.getElementById('guests').value, 10) || 100,
+      budget_per_plate: parseInt(document.getElementById('budget_per_plate').value, 10) || 30000,
+      isSample: true
+    };
+    const sampleText = [
+      'Starter:',
+      '- Groundnut soup with fresh dhania',
+      'Proteins:',
+      '- Luwombo chicken',
+      '- Beef stew in ground nut sauce',
+      'Starches:',
+      '- Steamed matooke',
+      '- Pilau rice',
+      'Vegetables:',
+      '- Sauteed greens (nakati)',
+      '- Beans in coconut sauce',
+      'Dessert:',
+      '- Sweet banana fritters',
+      'Estimated Cost: 27500 UGX'
+    ].join('\n');
+    renderMenu(parseMenuText(sampleText), meta);
+  });
+})();
+</script>
+
+</body>
+</html>
